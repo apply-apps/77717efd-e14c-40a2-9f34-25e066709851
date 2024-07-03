@@ -1,53 +1,101 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+// Filename: index.js
+// Combined code from all files
 
-const App = () => {
-  const fullText = 'Hi, this is Apply.\nCreating mobile apps is now as simple as typing text.\nJust input your idea and press APPLY, and our platform does the rest...';
-  const [displayedText, setDisplayedText] = useState('');
-  const [index, setIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+import React from 'react';
+import { SafeAreaView, StyleSheet, Text, FlatList, TouchableOpacity, View, ScrollView } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-  useEffect(() => {
-    if (isPaused) return;
+const Stack = createStackNavigator();
 
-    const interval = setInterval(() => {
-      setDisplayedText((prev) => prev + fullText[index]);
-      setIndex((prev) => {
-        if (prev === fullText.length - 1) {
-          setIsPaused(true);
-          setTimeout(() => {
-            setDisplayedText('');
-            setIndex(0);
-            setIsPaused(false);
-          }, 2000);
-          return 0;
-        }
-        return prev + 1;
-      });
-    }, 100);
+const tales = [
+  { id: '1', title: 'The Little Red Riding Hood' },
+  { id: '2', title: 'Cinderella' },
+  { id: '3', title: 'Snow White' },
+  { id: '4', title: 'Sleeping Beauty' },
+  { id: '5', title: 'Hansel and Gretel' },
+];
 
-    return () => clearInterval(interval);
-  }, [index, isPaused]);
+const HomeScreen = ({ navigation }) => {
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.taleItem}
+      onPress={() => navigation.navigate('Tale', { taleId: item.id, title: item.title })}
+    >
+      <Text style={styles.taleTitle}>{item.title}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{displayedText}</Text>
+      <FlatList
+        data={tales}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+      />
     </View>
   );
 };
 
+const talesContent = {
+  '1': 'Once upon a time, there was a little girl who lived in a village near the forest...',
+  '2': 'Once upon a time, there was a girl named Cinderella who lived with her cruel stepmother and stepsisters...',
+  '3': 'Once upon a time, there was a beautiful princess named Snow White who lived with her wicked stepmother...',
+  '4': 'Once upon a time, there was a princess who was cursed to sleep for a hundred years...',
+  '5': 'Once upon a time, there were two siblings named Hansel and Gretel who were lost in the forest...',
+};
+
+const TaleScreen = ({ route }) => {
+  const { taleId, title } = route.params;
+
+  return (
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.content}>{talesContent[taleId]}</Text>
+    </ScrollView>
+  );
+};
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <SafeAreaView style={styles.container}>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Tales for Kids' }} />
+          <Stack.Screen name="Tale" component={TaleScreen} options={{ title: 'Tale' }} />
+        </Stack.Navigator>
+      </SafeAreaView>
+    </NavigationContainer>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'black',
+    backgroundColor: '#FFFFFF',
+  },
+  list: {
     padding: 20,
   },
-  text: {
-    color: 'white',
+  taleItem: {
+    backgroundColor: '#F8F8F8',
+    padding: 20,
+    marginBottom: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  taleTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  title: {
     fontSize: 24,
-    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  content: {
+    fontSize: 18,
+    lineHeight: 24,
   },
 });
-
-export default App;
